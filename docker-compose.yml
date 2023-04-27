@@ -1,0 +1,51 @@
+version: '3.3'
+services:
+  db:
+    image: postgres:15.2
+    environment:
+      POSTGRES_DB: 'mini_exchange'
+      # So you don't have to use root, but you can if you like
+      POSTGRES_USER: 'mini_exchange'
+      # You can use whatever password you like
+      POSTGRES_PASSWORD: 'mini_exchangedbsecret'
+    ports:
+      - '5433:5432'
+    expose:
+      - '5433'
+      # Where our data will be persisted
+    volumes:
+      - mini_exchange-local-db:/var/lib/postgresql/data
+  directus:
+    image: directus/directus:9.26
+    ports:
+      - 8055:8055
+    expose:
+      - '8055'
+    volumes:
+      - mini_exchange-uploads:/directus/uploads
+    environment:
+      KEY: 'b6c51669b5316a430844ce0d2f5a1777'
+      SECRET: 'c3729674355144136fd179d80dc7f7d7'
+
+      DB_CLIENT: 'pg'
+      DB_HOST: 'host.docker.internal'
+      DB_PORT: '5433'
+      DB_PASSWORD: 'mini_exchangedbsecret'
+      DB_DATABASE: 'mini_exchange'
+      DB_USER: 'mini_exchange'
+
+      ADMIN_EMAIL: 'battulga.dev@gmail.com'
+      ADMIN_PASSWORD: 'adminsecret'
+  redis:
+    image: redis:7.0-alpine
+    ports:
+      - 6379:6379
+    expose:
+      - '6379'
+    environment:
+      REDIS_ARGS: "--requirepass redispwd"
+
+# Names our volume
+volumes:
+  mini_exchange-local-db:
+  mini_exchange-uploads:
