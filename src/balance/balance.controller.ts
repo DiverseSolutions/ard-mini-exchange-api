@@ -176,7 +176,7 @@ export class BalanceController {
                     user_balances ub 
                     join assets b on ub.asset_id = b.asset_id
                     join assets q on q.symbol = 'MNT'
-                    where ub.user_id = 34
+                    where ub.user_id = ${userId}
                 ) as t
             ) as t
         ) as t`
