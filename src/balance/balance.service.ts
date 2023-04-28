@@ -58,6 +58,20 @@ export class BalanceService {
             }
         })
         if (!balance) {
+            const initialBalanceSequence = BigInt(0);
+            await this.balanceLogService.saveLog({
+                prisma: params.prisma,
+                balanceAvl: balance.balance_avl,
+                balanceHold: balance.balance_hold,
+                userId: params.userId,
+                assetId: params.assetId,
+                creditAvl: new Prisma.Decimal(0),
+                creditHold: new Prisma.Decimal(0),
+                debitAvl: new Prisma.Decimal(0),
+                debitHold: new Prisma.Decimal(0),
+                sequence: initialBalanceSequence,
+                type: BalanceLogType.Create,
+            })
             const newBalance = await params.prisma.user_balances.create({
                 data: {
                     user_id: params.userId,
@@ -65,7 +79,7 @@ export class BalanceService {
                     balance_avl: new Prisma.Decimal(0),
                     balance_hold: new Prisma.Decimal(0),
                     created_at: moment().toDate(),
-                    sequence: BigInt(0),
+                    sequence: initialBalanceSequence,
                     status: Status.Active,
                 },
                 select: {
