@@ -20,17 +20,20 @@ export class CmsController {
             title: string;
             content: string;
             filename_disk: string;
+            created_at: any,
         }[]>`select 
         n.title,
         n."content",
-        f.filename_disk
+        f.filename_disk,
+        n.created_at
         from news n
         left join directus_files f on f.id = n.cover_img 
         where n.since <= now() and now() < n."until" and n.status = 'active'`
         const formatted = data.map((n) => ({
             title: n.title,
             content: n.content,
-            img: `https://mini-exchange-admin.dsolutions.mn/assets/${n.filename_disk}`
+            img: `https://mini-exchange-admin.dsolutions.mn/assets/${n.filename_disk}`,
+            created_at: n.created_at,
         }))
         return {
             pagination: {
