@@ -33,7 +33,7 @@ export class CmsController {
             title: n.title,
             content: n.content,
             img: `https://mini-exchange-admin.dsolutions.mn/assets/${n.filename_disk}`,
-            created_at: n.date_created,
+            createdAt: n.date_created,
         }))
         return {
             pagination: {
