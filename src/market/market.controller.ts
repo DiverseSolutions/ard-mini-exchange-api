@@ -1,9 +1,7 @@
-import { Decimal } from '@prisma/client/runtime';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CacheTTL, Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/auth/public.decorator';
-import { CacheKey } from '@nestjs/cache-manager';
 import { Prisma } from '@prisma/client';
 
 @Controller('market')

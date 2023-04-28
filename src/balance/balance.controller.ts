@@ -15,26 +15,29 @@ export class BalanceController {
 
     @Get("/all")
     async allBalance(@Req() req) {
+        const userId = BigInt(req.user.id)
         const balances = await this.prisma.$queryRaw<{
             symbol: string,
             name: string,
             balance_avl: Prisma.Decimal,
             balance_hold: Prisma.Decimal,
-        }[]>`select
-        a.symbol,
-        a."name",
-        coalesce(ub.balance_avl, 0) as balance_avl,
-        coalesce(ub.balance_hold, 0) as balance_hold
-        from assets a 
-        left join user_balances ub on ub.asset_id = a.asset_id 
-        where ub.user_id = ${BigInt(req.user.id)} or ub is null
-        order by ub.balance_avl is null asc, ub.balance_avl desc`
+        }[]>`select 
+        t.symbol,
+        t."name",
+        t.balance_avl
+        from (
+            select
+            a.symbol,
+            a."name",
+            coalesce((select ub.balance_avl from user_balances ub where ub.user_id = ${userId} and ub.asset_id = a.asset_id), 0) as "balance_avl"
+            from assets a
+        ) as t
+        order by t.balance_avl desc`
 
         const formatted = balances.map((b) => ({
             symbol: b.symbol,
             name: b.name,
             balanceAvl: b.balance_avl.toNumber(),
-            balanceHold: b.balance_hold.toNumber(),
         }))
 
         return {

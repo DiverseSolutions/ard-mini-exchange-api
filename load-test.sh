@@ -1,0 +1,1 @@
+npx loadtest -n 100 --rps 100 -c 8 -k -H "Authorization: Bearer $BEARER" -T "application/json" -p test-request.json http://localhost:3000/order/market
