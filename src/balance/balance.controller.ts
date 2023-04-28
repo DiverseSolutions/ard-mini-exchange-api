@@ -19,16 +19,19 @@ export class BalanceController {
         const balances = await this.prisma.$queryRaw<{
             symbol: string,
             name: string,
+            type: string,
             balance_avl: Prisma.Decimal,
             balance_hold: Prisma.Decimal,
         }[]>`select 
         t.symbol,
         t."name",
-        t.balance_avl
+        t.balance_avl,
+        t."type"
         from (
             select
             a.symbol,
             a."name",
+            a."type",
             coalesce((select ub.balance_avl from user_balances ub where ub.user_id = ${userId} and ub.asset_id = a.asset_id), 0) as "balance_avl"
             from assets a
         ) as t
@@ -38,6 +41,7 @@ export class BalanceController {
             symbol: b.symbol,
             name: b.name,
             balanceAvl: b.balance_avl.toNumber(),
+            type: b.type,
         }))
 
         return {
