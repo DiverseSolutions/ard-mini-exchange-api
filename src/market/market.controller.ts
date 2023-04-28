@@ -22,20 +22,24 @@ export class MarketController {
             price: Prisma.Decimal,
             prev_price: Prisma.Decimal,
         }[]>`select 
+        p.asset_price_id,
         a.symbol as "symbol",
         a."name" as "name",
         p.price,
+        p.since,
+        p."until",
         coalesce((select p2.price
             from asset_prices p2 
             where p2.base_symbol = p.base_symbol 
             and p2.quote_symbol = p.quote_symbol 
-            and p2.asset_price_id < p.asset_price_id 
-            order by p.asset_price_id desc 
+            and p2."until" < p."since" 
+            order by p."until" desc 
             limit 1), p.price) as "prev_price"
         from assets a
-        left join asset_prices p on p.base_symbol = a.symbol and (now() >= p.since and now() < p."until")
-        left join assets q on q.symbol = p.quote_symbol 
-        where a.status = 'active' and a."type" = 'stock' and (q is null or q.symbol = 'MNT')`
+        join asset_prices p on p.base_symbol = a.symbol
+        join assets q on q.symbol = p.quote_symbol 
+        where a.status = 'active' and a."type" = 'stock' and (q is null or q.symbol = 'MNT') and (now() >= p.since and now() < p."until")
+        order by p.since asc`
         const formatted = assets.map((a) => ({
             symbol: a.symbol,
             name: a.name,
