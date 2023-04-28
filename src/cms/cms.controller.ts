@@ -20,12 +20,12 @@ export class CmsController {
             title: string;
             content: string;
             filename_disk: string;
-            created_at: Date,
+            date_created: Date,
         }[]>`select 
         n.title,
         n."content",
         f.filename_disk,
-        n.created_at
+        n.date_created
         from news n
         left join directus_files f on f.id = n.cover_img 
         where n.since <= now() and now() < n."until" and n.status = 'active'`
@@ -33,7 +33,7 @@ export class CmsController {
             title: n.title,
             content: n.content,
             img: `https://mini-exchange-admin.dsolutions.mn/assets/${n.filename_disk}`,
-            created_at: n.created_at,
+            created_at: n.date_created,
         }))
         return {
             pagination: {
