@@ -22,23 +22,16 @@ export class MarketController {
             display_symbol: string,
             price: Prisma.Decimal,
             prev_price: Prisma.Decimal,
-        }[]>`select 
-        p.asset_price_id,
+        }[]>`select
         a.symbol as "symbol",
+        a.display_symbol,
         a."name" as "name",
-        p.price,
-        coalesce((select p2.price
-            from asset_prices p2 
-            where p2.base_symbol = p.base_symbol 
-            and p2.quote_symbol = p.quote_symbol 
-            and p2."until" <= p."since" 
-            order by p2."until" desc 
-            limit 1), p.price) as "prev_price"
+        (select p.price from asset_prices p where p.base_symbol = a.symbol and p.quote_symbol = q.symbol order by p."until" desc offset 1 limit 1) as "prev_price",
+        (select p.price from asset_prices p where p.base_symbol = a.symbol and p.quote_symbol = q.symbol and now() >= p.since and now() < p."until" order by p."until" desc limit 1) as "price"
         from assets a
-        join asset_prices p on p.base_symbol = a.symbol
-        join assets q on q.symbol = p.quote_symbol 
-        where a.status = 'active' and a."type" = 'stock' and (q is null or q.symbol = 'MNT') and (now() >= p.since and now() < p."until")
-        order by p.since asc`
+        join assets q on q.symbol = 'MNT'
+        where a."type" = 'stock'
+        order by a.symbol != 'AARD', a.symbol asc`
         const formatted = assets.map((a) => ({
             symbol: a.symbol,
             name: a.name,
@@ -46,7 +39,7 @@ export class MarketController {
             priceMnt: a.price ? a.price.toNumber() : null,
             isOrderEnabled: a.price ? true : false,
             prevPriceMnt: !a.prev_price ? null : a.prev_price.toNumber(),
-            changePercent: !a.prev_price ? 0 : ((BigNumber(a.price.toNumber()).minus(BigNumber(a.prev_price.toNumber()))).dividedBy(BigNumber(a.prev_price.toNumber()))).times(100).dp(2).toNumber()
+            changePercent: !a.prev_price || !a.price ? 0 : ((BigNumber(a.price.toNumber()).minus(BigNumber(a.prev_price.toNumber()))).dividedBy(BigNumber(a.prev_price.toNumber()))).times(100).dp(2).toNumber()
         }));
 
         return {
