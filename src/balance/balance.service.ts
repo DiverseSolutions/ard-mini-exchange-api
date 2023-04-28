@@ -61,8 +61,8 @@ export class BalanceService {
             const initialBalanceSequence = BigInt(0);
             await this.balanceLogService.saveLog({
                 prisma: params.prisma,
-                balanceAvl: balance.balance_avl,
-                balanceHold: balance.balance_hold,
+                balanceAvl: new Prisma.Decimal(0),
+                balanceHold: new Prisma.Decimal(0),
                 userId: params.userId,
                 assetId: params.assetId,
                 creditAvl: new Prisma.Decimal(0),
