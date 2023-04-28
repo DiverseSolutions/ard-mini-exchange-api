@@ -32,7 +32,7 @@ export class MarketController {
             from asset_prices p2 
             where p2.base_symbol = p.base_symbol 
             and p2.quote_symbol = p.quote_symbol 
-            and p2."until" < p."since" 
+            and p2."until" <= p."since" 
             order by p."until" desc 
             limit 1), p.price) as "prev_price"
         from assets a
