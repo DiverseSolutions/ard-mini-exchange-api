@@ -73,7 +73,8 @@ export class LeaderBoardController {
             ) as t
         ) as t
         group by t.phone_number
-        order by "total_balance_mnt" desc`
+        order by "total_balance_mnt" desc
+        limit 100`
 
         return {
             data: result.map((r, i) => ({
