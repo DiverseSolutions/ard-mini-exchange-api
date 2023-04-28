@@ -1,10 +1,10 @@
-import { asset_prices } from './../../node_modules/.prisma/client/index.d';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Controller, Get } from '@nestjs/common';
 import BigNumber from 'bignumber.js'
 import { ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/auth/public.decorator';
 import { Prisma } from '@prisma/client';
+import * as moment from 'moment';
 
 @Controller('market')
 @ApiTags("Market")
@@ -20,7 +20,6 @@ export class MarketController {
             symbol: string,
             name: string,
             display_symbol: string,
-            n: any,
             price: Prisma.Decimal,
             prev_price: Prisma.Decimal,
         }[]>`select 
@@ -28,7 +27,6 @@ export class MarketController {
         a.symbol as "symbol",
         a."name" as "name",
         p.price,
-        p."until",
         coalesce((select p2.price
             from asset_prices p2 
             where p2.base_symbol = p.base_symbol 
