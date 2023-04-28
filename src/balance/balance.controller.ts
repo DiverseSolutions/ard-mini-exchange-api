@@ -19,7 +19,7 @@ export class BalanceController {
     async allBalance(@Req() req) {
         const userId = BigInt(req.user.id)
         const balances = await this.prisma.$queryRaw<{
-            symbol: string,
+            base_symbol: string,
             name: string,
             type: string,
             balance_avl: Prisma.Decimal,
@@ -88,7 +88,7 @@ export class BalanceController {
         const emptyBalanceAssets = await this.prisma.assets.findMany({
             where: {
                 symbol: {
-                    notIn: balances.map((b) => b.symbol)
+                    notIn: balances.map((b) => b.base_symbol)
                 },
                 type: AssetType.Stock,
                 status: Status.Active
@@ -101,7 +101,7 @@ export class BalanceController {
         })
 
         const formatted = balances.map((b) => ({
-            symbol: b.symbol,
+            symbol: b.base_symbol,
             name: b.name,
             balanceMnt: b.balance_mnt.toNumber(),
             quoteProfit: b.quote_profit ? b.quote_profit.toNumber() : 0,
