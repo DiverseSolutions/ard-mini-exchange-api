@@ -437,8 +437,8 @@ model asset_prices {
   created_at                                             DateTime?       @db.Timestamptz(6)
   updated_by                                             String?         @db.Uuid
   updated_at                                             DateTime?       @db.Timestamptz(6)
-  since                                                  DateTime?       @db.Timestamp(6)
-  until                                                  DateTime?       @db.Timestamp(6)
+  since                                                  DateTime?       @db.Timestamptz(6)
+  until                                                  DateTime?       @db.Timestamptz(6)
   price                                                  Decimal?        @db.Decimal(32, 0)
   base_symbol                                            String?         @db.VarChar(16)
   quote_symbol                                           String?         @db.VarChar(16)

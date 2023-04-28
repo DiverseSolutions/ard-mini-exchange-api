@@ -1,3 +1,4 @@
+import { asset_prices } from './../../node_modules/.prisma/client/index.d';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Controller, Get } from '@nestjs/common';
 import BigNumber from 'bignumber.js'
@@ -57,7 +58,6 @@ export class MarketController {
                 offset: 0,
             },
             data: formatted,
-            debug: await this.prisma.$queryRaw`select now()`
         }
     }
 }
