@@ -83,7 +83,7 @@ export class BalanceController {
                 join assets q on q.symbol = 'MNT'
                 where ub.user_id = ${userId}
             ) as t
-        ) as t`
+        ) as t order by balance_mnt desc`
 
         const emptyBalanceAssets = await this.prisma.assets.findMany({
             where: {
