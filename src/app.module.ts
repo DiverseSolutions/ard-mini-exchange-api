@@ -11,6 +11,7 @@ import { MarketModule } from './market/market.module';
 import { OrderModule } from './order/order.module';
 import { BalanceModule } from './balance/balance.module';
 import { CmsModule } from './cms/cms.module';
+import { LeaderBoardModule } from './leader-board/leader-board.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { CmsModule } from './cms/cms.module';
     OrderModule,
     BalanceModule,
     CmsModule,
+    LeaderBoardModule,
   ],
   controllers: [],
   providers: [AppService,
