@@ -53,6 +53,7 @@ export class MarketOrderService {
             },
             select: {
                 asset_id: true,
+                symbol: true,
             }
         }).catch((e) => {
             throw new BadRequestException("asset-not-found")
@@ -66,8 +67,8 @@ export class MarketOrderService {
             where: {
                 OR: [
                     {
-                        base_asset_id: asset.asset_id,
-                        quote_asset_id: mntAsset.asset_id,
+                        base_symbol: asset.symbol,
+                        quote_symbol: mntAsset.symbol,
                         since: {
                             lte: moment().toDate(),
                         },
@@ -76,8 +77,8 @@ export class MarketOrderService {
                         }
                     },
                     {
-                        base_asset_id: asset.asset_id,
-                        quote_asset_id: mntAsset.asset_id,
+                        base_symbol: asset.symbol,
+                        quote_symbol: mntAsset.symbol,
                         since: {
                             gte: moment().toDate(),
                         },

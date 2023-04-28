@@ -36,8 +36,6 @@ model assets {
   scale                                              Int?
   type                                               String?            @db.VarChar(255)
   scale_amount                                       Decimal?           @default(1) @db.Decimal(32, 0)
-  asset_prices_asset_prices_base_asset_idToassets    asset_prices[]     @relation("asset_prices_base_asset_idToassets")
-  asset_prices_asset_prices_quote_asset_idToassets   asset_prices[]     @relation("asset_prices_quote_asset_idToassets")
   directus_users_assets_user_createdTodirectus_users directus_users?    @relation("assets_user_createdTodirectus_users", fields: [user_created], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "assets_user_created_foreign")
   directus_users_assets_user_updatedTodirectus_users directus_users?    @relation("assets_user_updatedTodirectus_users", fields: [user_updated], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "assets_user_updated_foreign")
   orders_orders_base_asset_idToassets                orders[]           @relation("orders_base_asset_idToassets")
@@ -439,12 +437,10 @@ model asset_prices {
   updated_at                                             DateTime?       @db.Timestamptz(6)
   since                                                  DateTime?       @db.Timestamp(6)
   until                                                  DateTime?       @db.Timestamp(6)
-  base_asset_id                                          BigInt?
-  quote_asset_id                                         BigInt?
   price                                                  Decimal?        @db.Decimal(32, 0)
-  assets_asset_prices_base_asset_idToassets              assets?         @relation("asset_prices_base_asset_idToassets", fields: [base_asset_id], references: [asset_id], onUpdate: NoAction, map: "asset_prices_base_asset_id_foreign")
+  base_symbol                                            String?         @db.VarChar(16)
+  quote_symbol                                           String?         @db.VarChar(16)
   directus_users_asset_prices_created_byTodirectus_users directus_users? @relation("asset_prices_created_byTodirectus_users", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "asset_prices_created_by_foreign")
-  assets_asset_prices_quote_asset_idToassets             assets?         @relation("asset_prices_quote_asset_idToassets", fields: [quote_asset_id], references: [asset_id], onUpdate: NoAction, map: "asset_prices_quote_asset_id_foreign")
   directus_users_asset_prices_updated_byTodirectus_users directus_users? @relation("asset_prices_updated_byTodirectus_users", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "asset_prices_updated_by_foreign")
   orders                                                 orders[]
 }

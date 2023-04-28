@@ -24,8 +24,8 @@ export class MarketController {
         a."name" as "name",
         p.price
         from assets a
-        left join asset_prices p on p.base_asset_id = a.asset_id and (now() >= p.since and (p."until" is null or now() <= p."until"))
-        left join assets q on q.asset_id = p.quote_asset_id 
+        left join asset_prices p on p.base_symbol = a.symbol and (now() >= p.since and (p."until" is null or now() < p."until"))
+        left join assets q on q.symbol = p.quote_symbol 
         where a."type" = 'stock' and (q is null or q.symbol = 'MNT')`
 
         const formatted = assets.map((a) => ({
