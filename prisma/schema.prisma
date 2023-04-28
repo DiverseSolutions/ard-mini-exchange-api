@@ -404,6 +404,8 @@ model directus_users {
   directus_sessions                                                       directus_sessions[]
   directus_shares                                                         directus_shares[]
   directus_roles                                                          directus_roles?          @relation(fields: [role], references: [id], onUpdate: NoAction, map: "directus_users_role_foreign")
+  news_news_user_createdTodirectus_users                                  news[]                   @relation("news_user_createdTodirectus_users")
+  news_news_user_updatedTodirectus_users                                  news[]                   @relation("news_user_updatedTodirectus_users")
   orders_orders_created_byTodirectus_users                                orders[]                 @relation("orders_created_byTodirectus_users")
   orders_orders_updated_byTodirectus_users                                orders[]                 @relation("orders_updated_byTodirectus_users")
   register_bonus_register_bonus_created_byTodirectus_users                register_bonus[]         @relation("register_bonus_created_byTodirectus_users")
@@ -430,7 +432,7 @@ model directus_webhooks {
 
 model asset_prices {
   asset_price_id                                         BigInt          @id @default(autoincrement())
-  status                                                 String?         @default("draft") @db.VarChar(255)
+  status                                                 String?         @default("active") @db.VarChar(255)
   created_by                                             String?         @db.Uuid
   created_at                                             DateTime?       @db.Timestamptz(6)
   updated_by                                             String?         @db.Uuid
@@ -443,6 +445,8 @@ model asset_prices {
   directus_users_asset_prices_created_byTodirectus_users directus_users? @relation("asset_prices_created_byTodirectus_users", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "asset_prices_created_by_foreign")
   directus_users_asset_prices_updated_byTodirectus_users directus_users? @relation("asset_prices_updated_byTodirectus_users", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "asset_prices_updated_by_foreign")
   orders                                                 orders[]
+
+  @@unique([base_symbol, quote_symbol, since], map: "asset_prices_un")
 }
 
 model orders {
@@ -461,6 +465,8 @@ model orders {
   total                                            Decimal?           @db.Decimal(32, 9)
   type                                             String?            @db.VarChar(32)
   side                                             String?            @db.VarChar(16)
+  base_symbol                                      String?            @db.VarChar(16)
+  quote_symbol                                     String?            @db.VarChar(16)
   assets_orders_base_asset_idToassets              assets?            @relation("orders_base_asset_idToassets", fields: [base_asset_id], references: [asset_id], onUpdate: NoAction, map: "orders_base_asset_id_foreign")
   directus_users_orders_created_byTodirectus_users directus_users?    @relation("orders_created_byTodirectus_users", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "orders_created_by_foreign")
   asset_prices                                     asset_prices?      @relation(fields: [price_id], references: [asset_price_id], onUpdate: NoAction, map: "orders_price_id_foreign")
@@ -525,4 +531,18 @@ model user_balance_log {
   orders                                                     orders?         @relation(fields: [order_id], references: [order_id], onUpdate: NoAction, map: "user_balance_log_order_id_foreign")
   directus_users_user_balance_log_updated_byTodirectus_users directus_users? @relation("user_balance_log_updated_byTodirectus_users", fields: [updated_by], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_balance_log_updated_by_foreign")
   users                                                      users?          @relation(fields: [user_id], references: [user_id], onUpdate: NoAction, map: "user_balance_log_user_id_foreign")
+}
+
+model news {
+  news_id                                          Int             @id @default(autoincrement())
+  status                                           String?         @default("draft") @db.VarChar(255)
+  user_created                                     String?         @db.Uuid
+  date_created                                     DateTime?       @db.Timestamptz(6)
+  user_updated                                     String?         @db.Uuid
+  date_updated                                     DateTime?       @db.Timestamptz(6)
+  title                                            String?         @db.VarChar(255)
+  content                                          String?
+  since                                            DateTime?       @db.Timestamp(6)
+  directus_users_news_user_createdTodirectus_users directus_users? @relation("news_user_createdTodirectus_users", fields: [user_created], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "news_user_created_foreign")
+  directus_users_news_user_updatedTodirectus_users directus_users? @relation("news_user_updatedTodirectus_users", fields: [user_updated], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "news_user_updated_foreign")
 }

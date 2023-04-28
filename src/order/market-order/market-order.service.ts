@@ -156,6 +156,8 @@ export class MarketOrderService {
                         qty: qtyDecimal,
                         total: totalDecimal,
                         created_at: moment().toDate(),
+                        base_symbol: asset.symbol,
+                        quote_symbol: mntAsset.symbol,
                     },
                     select: {
                         order_id: true,
