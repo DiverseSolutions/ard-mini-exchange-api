@@ -28,7 +28,7 @@ export class CmsController {
         n.date_created
         from news n
         left join directus_files f on f.id = n.cover_img 
-        where n.since <= now() and now() < n."until" and n.status = 'active'`
+        where n.since <= now() and now() < n."until" and n.status = 'active' order by n.date_created desc`
         const formatted = data.map((n) => ({
             title: n.title,
             content: n.content,
