@@ -2,6 +2,8 @@ import { Controller, Get, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 import BigNumber from 'bignumber.js';
+import { AssetType } from 'src/auth/enums/asset-type.enum';
+import { Status } from 'src/auth/enums/status.enum';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Controller('balance')
@@ -22,27 +24,101 @@ export class BalanceController {
             type: string,
             balance_avl: Prisma.Decimal,
             balance_hold: Prisma.Decimal,
+            quote_profit: Prisma.Decimal,
+            balance_mnt: Prisma.Decimal,
         }[]>`select 
-        t.symbol,
+        t.user_id,
         t."name",
+        t."type",
+        t.base_symbol,
+        t.quote_symbol,
         t.balance_avl,
-        t."type"
+        t.balance_avl * t."price_mnt" as "balance_mnt",
+        (
+        (select sum(o.total) from orders o where o.base_asset_id = t.base_asset_id and o.user_id = t.user_id and o.side = 'sell') - (select sum(o.total) from orders o where o.base_asset_id = t.base_asset_id and o.user_id = t.user_id and o.side = 'buy')
+        ) as "quote_profit"
         from (
-            select
-            a.symbol,
-            a."name",
-            a."type",
-            coalesce((select ub.balance_avl from user_balances ub where ub.user_id = ${userId} and ub.asset_id = a.asset_id), 0) as "balance_avl"
-            from assets a
-        ) as t
-        order by t.balance_avl desc`
+            select 
+            t.user_id,
+            t."name",
+            t."type",
+            t.base_symbol,
+            t.quote_symbol,
+            t.balance_avl,
+            t.base_asset_id,
+            (case
+                when "interval_price" is null 
+                then (
+                    select p.price from asset_prices p 
+                        where p.base_symbol = t.base_symbol 
+                        and p.quote_symbol = t.quote_symbol
+                        order by p."until" desc
+                        limit 1
+                )
+                else "interval_price"
+                end
+            ) as "price_mnt"
+            from (
+                select
+                ub.user_id,
+                b."type" as "type",
+                b."name" as "name",
+                b.symbol as "base_symbol",
+                q.symbol as "quote_symbol",
+                b.asset_id as "base_asset_id",
+                ub.balance_avl,
+                (case when b."type" != 'fiat' then (
+                    select p2.price 
+                    from asset_prices p2 
+                    where p2.quote_symbol = q.symbol 
+                    and p2.base_symbol = b.symbol 
+                    and now() >= p2.since 
+                    and now() < p2."until"
+                    order by p2."until" desc 
+                    limit 1
+                ) else 1 end) as "interval_price"
+                from 
+                user_balances ub 
+                join assets b on ub.asset_id = b.asset_id
+                join assets q on q.symbol = 'MNT'
+                where ub.user_id = ${userId}
+            ) as t
+        ) as t`
+
+        const emptyBalanceAssets = await this.prisma.assets.findMany({
+            where: {
+                symbol: {
+                    notIn: balances.map((b) => b.symbol)
+                },
+                type: AssetType.Stock,
+                status: Status.Active
+            },
+            select: {
+                symbol: true,
+                name: true,
+                type: true,
+            }
+        })
 
         const formatted = balances.map((b) => ({
             symbol: b.symbol,
             name: b.name,
+            balanceMnt: b.balance_mnt.toNumber(),
+            quoteProfit: b.quote_profit ? b.quote_profit.toNumber() : 0,
             balanceAvl: b.balance_avl.toNumber(),
             type: b.type,
         }))
+
+        emptyBalanceAssets.forEach((eb) => {
+            formatted.push({
+                symbol: eb.symbol,
+                name: eb.name,
+                balanceMnt: 0,
+                quoteProfit: 0,
+                balanceAvl: 0,
+                type: eb.type
+            })
+        })
 
         return {
             pagination: {
@@ -58,16 +134,55 @@ export class BalanceController {
     async getBalance(@Req() req) {
         const userId = BigInt(req.user.id)
         const totalBalance = await this.prisma.$queryRaw<{
-            balance_avl: Prisma.Decimal
-        }[]>`select
-        sum(coalesce(ub.balance_avl, 0) * coalesce(p.price, 1)) as balance_avl
-        from assets a 
-        left join user_balances ub on ub.asset_id = a.asset_id 
-        left join asset_prices p on p.base_symbol = a.symbol and (now() >= p.since and (p."until" is null or now() <= p."until"))
-        where ub.user_id = ${userId} or ub is null`
+            total_balance_mnt: Prisma.Decimal
+        }[]>`select sum(t.balance_mnt) as "total_balance_mnt" from (
+            select
+            t.balance_avl * t."price_mnt" as "balance_mnt"
+            from (
+                select
+                t.balance_avl,
+                (case
+                    when "interval_price" is null 
+                    then (
+                        select p.price from asset_prices p 
+                            where p.base_symbol = t.base_symbol 
+                            and p.quote_symbol = t.quote_symbol
+                            order by p."until" desc
+                            limit 1
+                    )
+                    else "interval_price"
+                    end
+                ) as "price_mnt"
+                from (
+                    select
+                    ub.user_id,
+                    b."type" as "type",
+                    b."name" as "name",
+                    b.symbol as "base_symbol",
+                    q.symbol as "quote_symbol",
+                    b.asset_id as "base_asset_id",
+                    ub.balance_avl,
+                    (case when b."type" != 'fiat' then (
+                        select p2.price 
+                        from asset_prices p2 
+                        where p2.quote_symbol = q.symbol 
+                        and p2.base_symbol = b.symbol 
+                        and now() >= p2.since 
+                        and now() < p2."until"
+                        order by p2."until" desc 
+                        limit 1
+                    ) else 1 end) as "interval_price"
+                    from 
+                    user_balances ub 
+                    join assets b on ub.asset_id = b.asset_id
+                    join assets q on q.symbol = 'MNT'
+                    where ub.user_id = 34
+                ) as t
+            ) as t
+        ) as t`
         return {
             data: {
-                totalMnt: totalBalance?.length ? totalBalance[0].balance_avl?.toNumber() || 0 : 0
+                totalMnt: totalBalance?.length ? totalBalance[0].total_balance_mnt?.toNumber() || 0 : 0
             }
         }
     }
