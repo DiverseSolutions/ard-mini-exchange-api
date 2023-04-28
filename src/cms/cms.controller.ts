@@ -20,7 +20,7 @@ export class CmsController {
             title: string;
             content: string;
             filename_disk: string;
-            created_at: any,
+            created_at: Date,
         }[]>`select 
         n.title,
         n."content",
