@@ -137,7 +137,9 @@ export class MarketOrderService {
                     orderId: order.order_id,
                 })
             }, {
-                isolationLevel: Prisma.TransactionIsolationLevel.Serializable
+                isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+                maxWait: 8000,
+                timeout: 12000,
             })
         } else if (request.side === OrderSide.Sell) {
             await this.prisma.$transaction(async (tx) => {
@@ -179,7 +181,9 @@ export class MarketOrderService {
                     orderId: order.order_id,
                 })
             }, {
-                isolationLevel: Prisma.TransactionIsolationLevel.Serializable
+                isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+                maxWait: 8000,
+                timeout: 12000,
             })
         }
     }

@@ -9,13 +9,15 @@ import { TrimPipe } from 'src/utils/trim.pipe';
 import { Status } from '../enums/status.enum';
 import { BalanceService } from 'src/balance/balance.service';
 import { BalanceLogType } from '../enums/balance-log-type.enum';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class RegisterService {
 
     constructor(
         private readonly prisma: PrismaService,
-        private readonly balanceService: BalanceService
+        private readonly balanceService: BalanceService,
+        private readonly jwtService: JwtService,
     ) {
 
     }
@@ -23,6 +25,7 @@ export class RegisterService {
     @UsePipes(new TrimPipe())
     async register(request: RegisterDto) {
         this.checkRequest(request);
+        let response;
         await this.prisma.$transaction(async (tx) => {
             const exists = await tx.users.findFirst({
                 where: {
@@ -55,6 +58,9 @@ export class RegisterService {
                     status: Status.Active,
                     password: pwdHash,
                     created_at: moment().toDate(),
+                },
+                select: {
+                    user_id: true,
                 }
             })
             if (bonus) {
@@ -72,9 +78,24 @@ export class RegisterService {
                     type: BalanceLogType.Deposit
                 })
             }
+            const jwt = await this.jwtService.signAsync({
+                phone: request.phone,
+                id: user.user_id.toString(),
+                role: "user"
+            }, {
+                expiresIn: '12h'
+            })
+            response = {
+                accessToken: jwt,
+            }
         }, {
-            isolationLevel: Prisma.TransactionIsolationLevel.Serializable
+            isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+            maxWait: 8000,
+            timeout: 12000,
         })
+        if (response) {
+            return response;
+        }
     }
 
     private checkRequest(request: RegisterDto) {
