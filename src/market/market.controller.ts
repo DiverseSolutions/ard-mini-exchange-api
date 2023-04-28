@@ -19,6 +19,7 @@ export class MarketController {
             symbol: string,
             name: string,
             display_symbol: string,
+            since: any,
             price: Prisma.Decimal,
             prev_price: Prisma.Decimal,
         }[]>`select 
@@ -46,6 +47,7 @@ export class MarketController {
             displaySymbol: a.display_symbol,
             priceMnt: a.price ? a.price.toNumber() : null,
             isOrderEnabled: a.price ? true : false,
+            since: a.since,
             prevPriceMnt: !a.prev_price ? null : a.prev_price.toNumber(),
             changePercent: !a.prev_price ? 0 : ((BigNumber(a.price.toNumber()).minus(BigNumber(a.prev_price.toNumber()))).dividedBy(BigNumber(a.prev_price.toNumber()))).dp(2).toNumber()
         }));
