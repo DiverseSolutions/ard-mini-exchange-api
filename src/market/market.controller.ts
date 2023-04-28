@@ -19,7 +19,7 @@ export class MarketController {
             symbol: string,
             name: string,
             display_symbol: string,
-            since: any,
+            n: any,
             price: Prisma.Decimal,
             prev_price: Prisma.Decimal,
         }[]>`select 
@@ -27,7 +27,6 @@ export class MarketController {
         a.symbol as "symbol",
         a."name" as "name",
         p.price,
-        p.since,
         p."until",
         coalesce((select p2.price
             from asset_prices p2 
@@ -47,7 +46,6 @@ export class MarketController {
             displaySymbol: a.display_symbol,
             priceMnt: a.price ? a.price.toNumber() : null,
             isOrderEnabled: a.price ? true : false,
-            since: a.since,
             prevPriceMnt: !a.prev_price ? null : a.prev_price.toNumber(),
             changePercent: !a.prev_price ? 0 : ((BigNumber(a.price.toNumber()).minus(BigNumber(a.prev_price.toNumber()))).dividedBy(BigNumber(a.prev_price.toNumber()))).dp(2).toNumber()
         }));
@@ -58,7 +56,8 @@ export class MarketController {
                 size: assets.length,
                 offset: 0,
             },
-            data: formatted
+            data: formatted,
+            debug: await this.prisma.$queryRaw`select now()`
         }
     }
 }
