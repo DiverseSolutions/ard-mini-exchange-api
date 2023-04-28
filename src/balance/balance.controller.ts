@@ -58,8 +58,8 @@ export class BalanceController {
         }[]>`select
         sum(coalesce(ub.balance_avl, 0) * coalesce(p.price, 1)) as balance_avl
         from assets a 
-        left join user_balances ub on ub.asset_id = a.asset_id
-        left join asset_prices p on p.base_asset_id = a.asset_id and (now() >= p.since and (p."until" is null or now() <= p."until"))
+        left join user_balances ub on ub.asset_id = a.asset_id 
+        left join asset_prices p on p.base_symbol = a.symbol and (now() >= p.since and (p."until" is null or now() <= p."until"))
         where ub.user_id = ${userId} or ub is null`
         return {
             data: {
