@@ -542,7 +542,8 @@ model news {
   date_updated                                     DateTime?       @db.Timestamptz(6)
   title                                            String?         @db.VarChar(255)
   content                                          String?
-  since                                            DateTime?       @db.Timestamp(6)
+  since                                            DateTime?       @db.Timestamptz(6)
+  until                                            DateTime?       @db.Timestamptz(6)
   directus_users_news_user_createdTodirectus_users directus_users? @relation("news_user_createdTodirectus_users", fields: [user_created], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "news_user_created_foreign")
   directus_users_news_user_updatedTodirectus_users directus_users? @relation("news_user_updatedTodirectus_users", fields: [user_updated], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "news_user_updated_foreign")
 }

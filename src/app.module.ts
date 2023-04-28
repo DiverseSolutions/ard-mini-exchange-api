@@ -10,6 +10,7 @@ import { UserModule } from './user/user.module';
 import { MarketModule } from './market/market.module';
 import { OrderModule } from './order/order.module';
 import { BalanceModule } from './balance/balance.module';
+import { CmsModule } from './cms/cms.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { BalanceModule } from './balance/balance.module';
     MarketModule,
     OrderModule,
     BalanceModule,
+    CmsModule,
   ],
   controllers: [],
   providers: [AppService,
