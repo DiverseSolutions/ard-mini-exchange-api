@@ -47,7 +47,7 @@ export class OrderController {
         join assets b on b.asset_id = o.base_asset_id
         join assets q on q.asset_id = o.quote_asset_id
         where o.user_id = ${userId}
-        order by o.order_id asc`
+        order by o.order_id desc`
         const formatted = result.map((o) => ({
             symbol: o.symbol,
             name: o.name,
