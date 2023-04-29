@@ -29,7 +29,7 @@ export class MarketController {
         t.prev_price,
         (case when t.interval_price is not null then t.interval_price 
         else (
-            select p.price from asset_prices p where p.base_symbol = t.symbol and p.quote_symbol = t.quote_symbol order by p."until" desc offset 0 limit 1
+            select p.price from asset_prices p where now() >= p.since and p.base_symbol = t.symbol and p.quote_symbol = t.quote_symbol order by p."until" desc offset 0 limit 1
         ) end) as "price"
         from (
             select
