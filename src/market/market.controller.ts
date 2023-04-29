@@ -37,7 +37,7 @@ export class MarketController {
             a.display_symbol,
             q.symbol as "quote_symbol",
             a."name" as "name",
-            (select p.price from asset_prices p where p.base_symbol = a.symbol and p.quote_symbol = q.symbol order by p."until" desc offset 1 limit 1) as "prev_price",
+            (select p.price from asset_prices p where now() >= p.since and p.base_symbol = a.symbol and p.quote_symbol = q.symbol order by p."until" desc offset 1 limit 1) as "prev_price",
             (select p.price from asset_prices p where p.base_symbol = a.symbol and p.quote_symbol = q.symbol and now() >= p.since and now() < p."until" order by p."until" desc limit 1) as "interval_price"
             from assets a
             join assets q on q.symbol = 'MNT'
