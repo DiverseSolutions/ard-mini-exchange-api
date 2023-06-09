@@ -44,6 +44,7 @@ export class MarketOrderService {
                 type: AssetType.Stock
             }
         }).catch((e) => {
+            console.log(`stock not found ${request.symbol}`)
             throw new BadRequestException("asset-not-found")
         })
 
@@ -56,6 +57,7 @@ export class MarketOrderService {
                 symbol: true,
             }
         }).catch((e) => {
+            console.log(`mnt asset not found`)
             throw new BadRequestException("asset-not-found")
         })
 
