@@ -45,7 +45,6 @@ export class MarketOrderService {
             }
         }).catch((e) => {
             console.log(`stock not found ${request.symbol}`)
-            this.prisma.assets.findMany().then((r) => console.log(r))
             throw new BadRequestException("asset-not-found")
         })
 
