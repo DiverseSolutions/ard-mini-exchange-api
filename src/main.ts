@@ -16,9 +16,7 @@ async function bootstrap() {
   SwaggerModule.setup('/docs', app, document);
   const port = process.env.PORT || 3000
   app.useGlobalPipes(new ValidationPipe())
-  app.enableCors({
-    origin: '*'
-  })
+  app.enableCors()
   await app.listen(port);
   console.log(`Listening on port ${port}`)
 }
