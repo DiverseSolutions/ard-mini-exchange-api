@@ -32,7 +32,7 @@ export class CmsController {
         const formatted = data.map((n) => ({
             title: n.title,
             content: n.content,
-            img: `https://mini-exchange-admin.ardsec.mn/assets/${n.filename_disk}`,
+            img: `https://cms.ardsec.mn/assets/${n.filename_disk}`,
             createdAt: n.date_created,
         }))
         return {
