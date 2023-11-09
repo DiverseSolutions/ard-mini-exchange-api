@@ -1,6 +1,6 @@
 import { Controller, Get, HttpException, Query } from '@nestjs/common';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
-import {maskPhoneNumber} from "mask-phone-number"
+import { maskPhoneNumber } from "mask-phone-number"
 import { Public } from 'src/auth/public.decorator';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { createDirectus, rest, authentication, readPermissions } from '@directus/sdk';
@@ -26,10 +26,14 @@ export class LeaderBoardController {
         let isReveal = false;
         if (revealAccessToken) {
             directus.setToken(revealAccessToken);
-            const permList: any[] = await directus.request(readPermissions())
-            const perm = permList.find((p) => p.collection === 'users' && p.action == 'read')
-            if (perm) {
-                isReveal = true;
+            try {
+                const permList: any[] = await directus.request(readPermissions())
+                const perm = permList.find((p) => p.collection === 'users' && p.action == 'read')
+                if (perm) {
+                    isReveal = true;
+                }
+            } catch (e) {
+                console.error(e);
             }
         }
         const result = await this.prisma.$queryRaw<{
@@ -95,7 +99,7 @@ export class LeaderBoardController {
 
         return {
             data: result.map((r, i) => ({
-                rank: i+1,
+                rank: i + 1,
                 ...r,
                 phone_number: isReveal ? r.phone_number : maskPhoneNumber(r.phone_number)
             })),
