@@ -12,9 +12,12 @@ import { OrderModule } from './order/order.module';
 import { BalanceModule } from './balance/balance.module';
 import { CmsModule } from './cms/cms.module';
 import { LeaderBoardModule } from './leader-board/leader-board.module';
+import { LibModule } from '@app/lib';
+import { CsvImportModule } from './csv-import/csv-import.module';
 
 @Module({
   imports: [
+    LibModule,
     ConfigModule.forRoot({
       envFilePath: '.env'
     }),
@@ -33,6 +36,7 @@ import { LeaderBoardModule } from './leader-board/leader-board.module';
     BalanceModule,
     CmsModule,
     LeaderBoardModule,
+    CsvImportModule,
   ],
   controllers: [],
   providers: [AppService,
