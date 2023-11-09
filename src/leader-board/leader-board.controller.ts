@@ -22,7 +22,7 @@ export class LeaderBoardController {
         type: String,
         required: false,
     })
-    async leaderBoard(@Query('revealAccessToken') revealAccessToken: string) {
+    async leaderBoard(@Query('revealAccessToken') revealAccessToken?: string) {
         let isReveal = false;
         if (revealAccessToken) {
             directus.setToken(revealAccessToken);
