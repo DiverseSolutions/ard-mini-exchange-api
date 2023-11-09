@@ -49,9 +49,9 @@ export class CsvImportController {
         await this.prisma.$transaction(async (tx) => {
             const promises = await Promise.all(rows.map(async (row) => {
                 const mSince = moment(row.since, 'YYYY.MM.DD HH:mm:ss')
-                const since = mSince.isValid() ? mSince : null;
+                const since = mSince.isValid() ? mSince.subtract(8, 'hours') : null;
                 const mUntil = moment(row.until, 'YYYY.MM.DD HH:mm:ss')
-                const until = mUntil.isValid() ? mUntil : null;
+                const until = mUntil.isValid() ? mUntil.subtract(8, 'hours') : null;
                 if (!since) {
                     throw new HttpException({msg: "\"since\" is missing"}, 400)
                 }
