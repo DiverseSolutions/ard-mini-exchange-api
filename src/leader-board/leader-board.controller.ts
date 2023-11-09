@@ -1,8 +1,11 @@
-import { Controller, Get } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Controller, Get, HttpException, Query } from '@nestjs/common';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import {maskPhoneNumber} from "mask-phone-number"
 import { Public } from 'src/auth/public.decorator';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { createDirectus, rest, authentication, readPermissions } from '@directus/sdk';
+
+const directus = createDirectus(process.env.DIRECTUS_URL || "https://mini-exchange-cms.ardsec.mn").with(rest()).with(authentication("json"))
 
 @Controller('leader-board')
 @ApiTags('leader-board')
@@ -14,7 +17,21 @@ export class LeaderBoardController {
 
     @Public()
     @Get()
-    async leaderBoard() {
+    @ApiQuery({
+        name: 'revealAccessToken',
+        type: String,
+        required: false,
+    })
+    async leaderBoard(@Query('revealAccessToken') revealAccessToken: string) {
+        let isReveal = false;
+        if (revealAccessToken) {
+            directus.setToken(revealAccessToken);
+            const permList: any[] = await directus.request(readPermissions())
+            const perm = permList.find((p) => p.collection === 'users' && p.action == 'read')
+            if (perm) {
+                isReveal = true;
+            }
+        }
         const result = await this.prisma.$queryRaw<{
             phone_number: string,
             total_balance_mnt: string,
@@ -80,7 +97,7 @@ export class LeaderBoardController {
             data: result.map((r, i) => ({
                 rank: i+1,
                 ...r,
-                phone_number: maskPhoneNumber(r.phone_number)
+                phone_number: isReveal ? r.phone_number : maskPhoneNumber(r.phone_number)
             })),
         }
     }
