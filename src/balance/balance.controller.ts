@@ -90,7 +90,12 @@ export class BalanceController {
                 symbol: {
                     notIn: balances.map((b) => b.base_symbol)
                 },
-                type: AssetType.Stock,
+                type: {
+                    in: [
+                        AssetType.Stock,
+                        AssetType.Fiat
+                    ]
+                },
                 status: Status.Active
             },
             select: {
